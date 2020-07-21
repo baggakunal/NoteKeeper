@@ -1,6 +1,7 @@
 package com.example.notekeeper;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -47,8 +48,7 @@ public class NoteListActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Intent intent = new Intent(NoteListActivity.this, NoteActivity.class);
-                NoteInfo note = (NoteInfo) listNotes.getItemAtPosition(position);
-                intent.putExtra(NoteActivity.NOTE_INFO, note);
+                intent.putExtra(NoteActivity.NOTE_POSITION, position);
                 startActivity(intent);
             }
         });
