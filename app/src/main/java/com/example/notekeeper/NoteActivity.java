@@ -22,6 +22,8 @@ public class NoteActivity extends AppCompatActivity {
     private Spinner mSpinnerCourses;
     private EditText mTextNoteTitle;
     private EditText mTextNoteText;
+    private int mNotePosition;
+    private boolean mIsDiscarding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +61,16 @@ public class NoteActivity extends AppCompatActivity {
         Intent intent = getIntent();
         int position = intent.getIntExtra(NoteActivity.NOTE_POSITION, POSITION_NOT_SET);
         mIsNewNote = position == POSITION_NOT_SET;
-        if (!mIsNewNote) {
+        if (mIsNewNote)
+            createNewNote();
+        else
             mNote = DataManager.getInstance().getNotes().get(position);
-        }
+    }
+
+    private void createNewNote() {
+        DataManager dm = DataManager.getInstance();
+        mNotePosition = dm.createNewNote();
+        mNote = dm.getNotes().get(mNotePosition);
     }
 
     @Override
@@ -72,6 +81,23 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (mIsDiscarding) {
+            if (mIsNewNote)
+                DataManager.getInstance().removeNote(mNotePosition);
+        } else {
+            saveNote();
+        }
+    }
+
+    private void saveNote() {
+        mNote.setCourse((CourseInfo) mSpinnerCourses.getSelectedItem());
+        mNote.setTitle(mTextNoteTitle.getText().toString());
+        mNote.setText(mTextNoteText.getText().toString());
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -79,7 +105,10 @@ public class NoteActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_send_mail) {
+        if (id == R.id.action_discard_note) {
+            mIsDiscarding = true;
+            finish();
+        } else if (id == R.id.action_send_mail) {
             sendEmail();
             return true;
         }
